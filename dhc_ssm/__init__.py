@@ -1,18 +1,17 @@
 """
 DHC-SSM Enhanced: Deterministic Hierarchical Causal State Space Model
 
-A production-ready implementation of the DHC-SSM architecture combining:
+An implementation of the DHC-SSM architecture combining:
 - Enhanced CNN for spatial processing (O(n))
 - Selective State Space Models for temporal processing (O(n))
 - Graph Neural Networks for causal reasoning
 - Pareto optimization for deterministic multi-objective learning
 
-This enhanced version includes:
-- Robust error handling and validation
-- Comprehensive testing infrastructure
-- Production-ready features
-- Extensive documentation
+This version includes:
+- Error handling and validation
+- Testing infrastructure
 - Modular and extensible design
+- Configuration management
 
 Author: Sung Hun Kwag (Enhanced v2.0)
 License: MIT
