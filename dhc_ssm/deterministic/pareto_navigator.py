@@ -1,64 +1,45 @@
 """
-Pareto Optimizer: Add NaN protection and temperature scheduling
+GradientComputer: add robust fallback for None grads and clipping utilities
 """
 import torch
-import torch.nn.functional as F
 from torch import nn
 
-class ParetoOptimizer(nn.Module):
-    def __init__(self, input_dim: int, action_dim: int, num_objectives: int = 4, device: str = 'cpu'):
+class GradientComputer(nn.Module):
+    def __init__(self, num_objectives: int = 4, device: str = 'cpu'):
         super().__init__()
-        self.input_dim = input_dim
-        self.action_dim = action_dim
         self.num_objectives = num_objectives
         self.device = device
-        self.register_buffer('temperature', torch.tensor(2.0, device=device))
-        
-        self.objective_networks = nn.ModuleList([
-            nn.Sequential(
-                nn.Linear(input_dim, input_dim // 2, device=device),
-                nn.ReLU(),
-                nn.Linear(input_dim // 2, action_dim, device=device)
-            ) for _ in range(num_objectives)
-        ])
-        self.weight_optimizer = nn.Sequential(
-            nn.Linear(num_objectives, num_objectives * 2, device=device),
-            nn.ReLU(),
-            nn.Linear(num_objectives * 2, num_objectives, device=device),
-        )
+        self.clip_value = 1.0
     
-    def step_temperature(self, decay: float = 0.99, min_temp: float = 0.5):
-        with torch.no_grad():
-            self.temperature.mul_(decay)
-            if self.temperature.item() < min_temp:
-                self.temperature.fill_(min_temp)
+    def set_clip(self, value: float):
+        self.clip_value = float(value)
     
-    def compute_pareto_weights(self, error_vectors: torch.Tensor) -> torch.Tensor:
-        epsilon = 1e-8
-        safe_errors = torch.nan_to_num(error_vectors, posinf=1e6, neginf=1e6)
-        safe_errors = safe_errors + epsilon
-        normalized = F.normalize(safe_errors, dim=-1)
-        raw = self.weight_optimizer(normalized)
-        weights = F.softmax(raw / self.temperature, dim=-1)
-        # Floor to avoid exact zeros
-        floor = 0.01
-        weights = weights * (1 - floor * self.num_objectives) + floor
-        # Renormalize to sum to 1
-        weights = weights / weights.sum(dim=-1, keepdim=True)
-        weights = torch.nan_to_num(weights, nan=1.0/self.num_objectives)
-        return weights
-    
-    def forward(self, state_input: torch.Tensor, error_vectors: torch.Tensor):
-        # Compute actions for each objective
-        objective_actions = []
-        for net in self.objective_networks:
-            obj_action = net(state_input)
-            objective_actions.append(obj_action)
-        objective_actions = torch.stack(objective_actions, dim=1)
+    def compute_multi_objective_gradients(self, error_vectors, parameters):
+        # Compute per-objective gradients with allow_unused
+        objective_grads = {}
+        for name, signal in error_vectors.items():
+            loss = torch.mean(signal)
+            grads = torch.autograd.grad(
+                loss, parameters, retain_graph=True, create_graph=False, allow_unused=True
+            )
+            # Replace None with zeros
+            fixed = []
+            for p, g in zip(parameters, grads):
+                if g is None:
+                    fixed.append(torch.zeros_like(p))
+                else:
+                    fixed.append(torch.clamp(g, -self.clip_value, self.clip_value))
+            objective_grads[name] = fixed
         
-        # Compute stable weights
-        weights = self.compute_pareto_weights(error_vectors)
+        # Equal weights for now (could be replaced by learned weights)
+        combined = []
+        for idx in range(len(parameters)):
+            acc = torch.zeros_like(parameters[idx])
+            for name in error_vectors.keys():
+                acc += objective_grads[name][idx] / self.num_objectives
+            combined.append(acc)
         
-        # Weighted sum
-        action = torch.sum(objective_actions * weights.unsqueeze(-1), dim=1)
-        return action, weights
+        return {
+            'combined_gradients': combined,
+            'objective_gradients': objective_grads
+        }
