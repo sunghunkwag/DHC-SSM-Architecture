@@ -2,14 +2,14 @@
 Setup configuration for DHC-SSM Enhanced Architecture v2.0
 
 Deterministic Hierarchical Causal State Space Model
-A revolutionary AI architecture eliminating probabilistic sampling uncertainty.
+An AI architecture with deterministic learning approach.
 
 v2.0 Features:
-- Production-ready error handling
-- Comprehensive shape validation
+- Error handling improvements
+- Shape validation
 - Configuration management system
-- Enhanced device consistency
-- Automated testing suite
+- Device consistency improvements
+- Testing suite
 """
 
 from setuptools import setup, find_packages
@@ -44,10 +44,10 @@ dev_requirements = [
 
 setup(
     name="dhc-ssm-architecture",
-    version="2.0.0",  # Updated to v2.0
+    version="2.0.0",
     author="Sung Hun Kwag",
     author_email="sunghunkwag@gmail.com",
-    description="DHC-SSM Enhanced v2.0 - Production-Ready Deterministic O(n) AI Architecture",
+    description="DHC-SSM Enhanced v2.0 - Deterministic O(n) AI Architecture",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/sunghunkwag/DHC-SSM-Architecture",
@@ -59,7 +59,7 @@ setup(
     },
     packages=find_packages(),
     classifiers=[
-        "Development Status :: 5 - Production/Stable",  # Upgraded from Beta
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -70,7 +70,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",  # Added 3.12 support
+        "Programming Language :: Python :: 3.12",
         "Operating System :: OS Independent",
         "Natural Language :: English",
     ],
@@ -87,8 +87,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "dhc-ssm-demo=examples.demo:main",  # Updated to new demo
-            "dhc-ssm-legacy-demo=examples.dhc_ssm_demo:main",  # Legacy demo
+            "dhc-ssm-demo=examples.demo:main",
+            "dhc-ssm-legacy-demo=examples.dhc_ssm_demo:main",
         ],
     },
     keywords=[
@@ -104,8 +104,6 @@ setup(
         "pareto optimization",
         "O(n) complexity",
         "transformer alternative",
-        "probabilistic uncertainty elimination",  # v2.0 keyword
-        "production ready",
         "shape validation",
         "configuration management",
     ],
@@ -118,6 +116,6 @@ setup(
         "complexity": "O(n)",
         "learning_type": "deterministic",
         "probabilistic_sampling": False,
-        "production_ready": True,
+        "status": "beta",
     }
 )
