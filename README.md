@@ -1,4 +1,4 @@
-# 🧠 DHC-SSM Enhanced Architecture v2.1 (Production Ready) 🎉
+#  DHC-SSM Enhanced Architecture v2.1 (Production Ready) 
 
 ## Deterministic Hierarchical Causal State Space Model
 
